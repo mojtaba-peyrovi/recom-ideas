@@ -1,0 +1,20 @@
+#standardsql
+select
+all_orders.hotel_id as Hotel_ID,
+all_orders.d10_hotel_city_name as City,
+all_orders.d15_hotel_name as Hotel_Name,
+d25_hotel_location_latitude as lat,
+d26_hotel_location_longitude as lon,
+count(case when d180_order_referral_source_code = 'TRIVAGO' then 1 else null end) as order_count_trivago,
+count(case when d180_order_referral_source_code = 'TRIPADVISOR' then 1 else null end) as order_count_tripadvisor,
+count(case when d180_order_referral_source_code not in ('TRIPADVISOR','TRIVAGO') then 1 else null end) as order_count_others,
+count(distinct order_id) AS Orders,
+sum(m03_count_of_nights_booked) AS RNS,
+round(sum(m07_selling_price_total_usd),0) AS GBV
+from analyst.all_orders 
+left join bi_export.hotel
+on 1=1
+and all_orders.hotel_id = hotel.hotel_id
+where all_orders.hotel_id <> -1
+group by 1,2,3,4,5
+order by GBV desc
